@@ -1,0 +1,662 @@
+import 'dart:ui';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:slide_to_act/slide_to_act.dart';
+
+Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding:
+          EdgeInsets.symmetric(vertical: 13, horizontal: isSelected ? 56 : 46),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.green : Colors.grey[900],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      curve: Curves.easeInOut,
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(color: Colors.white),
+      ),
+    ),
+  );
+}
+
+InputDecoration buildInputDecoration(String label) {
+  return InputDecoration(
+    labelText: label,
+    labelStyle: TextStyle(
+      color: Color.fromRGBO(180, 177, 180, 1),
+      fontFamily: 'Inter',
+      fontWeight: FontWeight.w600,
+    ),
+    filled: true,
+    fillColor: Colors.grey[900],
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(59),
+      borderSide: BorderSide.none,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(20),
+      borderSide: const BorderSide(color: Colors.green),
+    ),
+    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+  );
+}
+
+Widget customInputField(String hint, TextEditingController controller) {
+  return TextField(
+    controller: controller,
+    style: const TextStyle(color: Colors.white),
+    decoration: buildInputDecoration(hint),
+  );
+}
+
+class CustomEllipse extends StatelessWidget {
+  final double width;
+  final double height;
+  final Color backgroundColor;
+  final double blurRadius;
+  final double opacity;
+  final double top;
+  final double left;
+
+  const CustomEllipse({
+    Key? key,
+    this.width = 262.11,
+    this.height = 262.35,
+    this.backgroundColor = const Color(0xFFE8CC9F),
+    this.blurRadius = 400.0,
+    this.opacity = 0.2,
+    this.top = 98.96,
+    this.left = -153.6,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      left: left,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(height / 2), // Creates an ellipse
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin:
+                  Alignment.topLeft, // Adjusted direction for smoother spread
+              end: Alignment.bottomRight, // Gradients spread diagonally
+              colors: [
+                backgroundColor
+                    .withOpacity(opacity), // Higher opacity to start smooth
+                backgroundColor.withOpacity(
+                    opacity * 0.8), // Less opacity to smooth out the transition
+              ],
+              stops: [
+                0.0,
+                1.0
+              ], // Spread evenly, but with smoother opacity transition
+            ),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: blurRadius, sigmaY: blurRadius),
+            child: Container(
+              color: Colors
+                  .transparent, // Keeps the blur effect while allowing gradient behind
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GradientBorderWidget extends StatelessWidget {
+  final double width;
+  final double height;
+  final Widget child;
+
+  GradientBorderWidget({
+    Key? key,
+    this.width = 200.0,
+    this.height = 200.0,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: CustomPaint(
+        painter: GradientBorderPainter(),
+        child: child,
+      ),
+    );
+  }
+}
+
+class GradientBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.3
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color.fromARGB(0, 255, 255, 255),
+          Color.fromARGB(255, 153, 153, 153),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(10)),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class DraggableFormCard extends StatefulWidget {
+  final TextEditingController nameController;
+  final TextEditingController ageController;
+  final TextEditingController locationController;
+
+  const DraggableFormCard({
+    Key? key,
+    required this.nameController,
+    required this.ageController,
+    required this.locationController,
+  }) : super(key: key);
+
+  @override
+  _DraggableFormCardState createState() => _DraggableFormCardState();
+}
+
+class _DraggableFormCardState extends State<DraggableFormCard> {
+  String selectedGender = '';
+
+  void onGenderSelected(String gender) {
+    setState(() {
+      selectedGender = gender;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.57,
+        minChildSize: 0.57,
+        maxChildSize: 0.85,
+        builder: (context, scrollController) {
+          return Card(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+            ),
+            elevation: 10,
+            color: Colors.black,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Hey, Tell me about you!",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SvgPicture.asset(
+                      'assets/svgs/Vector.svg',
+                      width: 49,
+                      height: 6,
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Gender Selection
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        genderButton("Male", selectedGender == "Male", () {
+                          onGenderSelected("Male");
+                        }),
+                        const SizedBox(width: 15),
+                        genderButton("Female", selectedGender == "Female", () {
+                          onGenderSelected("Female");
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Input Fields
+                    customInputField("Your good name", widget.nameController),
+                    const SizedBox(height: 16),
+                    customInputField("How old are you?", widget.ageController),
+                    const SizedBox(height: 16),
+                    CustomDropdownField(
+                      controller: widget.locationController,
+                      items: ["New York", "London", "Paris", "Tokyo", 'Mumbai'],
+                      hint: "Location",
+                      svgIconPath: 'assets/svgs/tabler_location-filled.svg',
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CustomDropdownField extends StatefulWidget {
+  final TextEditingController controller;
+  final List<String> items;
+  final String hint;
+  final String svgIconPath;
+
+  const CustomDropdownField({
+    Key? key,
+    required this.controller,
+    required this.items,
+    this.hint = "Select an option",
+    required this.svgIconPath,
+  }) : super(key: key);
+
+  @override
+  _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
+}
+
+class _CustomDropdownFieldState extends State<CustomDropdownField> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final selectedValue = await showDialog<String>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: Text(
+              widget.hint,
+              style: const TextStyle(
+                color: Color.fromARGB(137, 212, 34, 34),
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: widget.items.map((item) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop(item);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+        if (selectedValue != null) {
+          setState(() {
+            widget.controller.text = selectedValue;
+          });
+        }
+      },
+      child: Stack(
+        children: [
+          InputDecorator(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey[900],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(32),
+                borderSide: BorderSide.none,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 20, top: 10, bottom: 10),
+                child: SvgPicture.asset(
+                  widget.svgIconPath,
+                  width: 16,
+                  height: 16,
+                ),
+              ),
+            ),
+            child: Text(
+              widget.controller.text.isEmpty
+                  ? widget.hint
+                  : widget.controller.text,
+              style: TextStyle(
+                color: widget.controller.text.isEmpty
+                    ? Colors.white54
+                    : Colors.white,
+                fontSize: 16,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SliderButton extends StatefulWidget {
+  final String text;
+  final VoidCallback onSlide;
+  final Color backgroundColor;
+  final Color sliderColor;
+  final Color textColor;
+  final TextStyle? textStyle;
+
+  const SliderButton({
+    Key? key,
+    required this.text,
+    required this.onSlide,
+    this.backgroundColor = Colors.grey,
+    this.sliderColor = Colors.white,
+    this.textColor = Colors.black,
+    this.textStyle,
+  }) : super(key: key);
+
+  @override
+  _SliderButtonState createState() => _SliderButtonState();
+}
+
+class _SliderButtonState extends State<SliderButton>
+    with SingleTickerProviderStateMixin {
+  double _position = 0;
+  bool _isCompleted = false;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  double _scaleValue = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double maxWidth = MediaQuery.of(context).size.width - 80;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 600),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: animation, child: child),
+        );
+      },
+      child: _isCompleted
+          ? ScaleTransition(
+              scale: _scaleAnimation,
+              child: Container(
+                key: const ValueKey("success"),
+                width: 30,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  "✔",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+          : Container(
+              key: const ValueKey("slider"),
+              width: maxWidth,
+              height: 60,
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 600),
+                      opacity: _isCompleted ? 0.0 : 1.0,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 30),
+                        child: Text(
+                          widget.text,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: widget.textColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTapDown: (_) {
+                      setState(() {
+                        _scaleValue = 1.1;
+                      });
+                    },
+                    onTapUp: (_) {
+                      setState(() {
+                        _scaleValue = 2.0;
+                      });
+                    },
+                    onHorizontalDragUpdate: (details) {
+                      if (!_isCompleted) {
+                        setState(() {
+                          _position += details.primaryDelta!;
+                          if (_position < 0) _position = 0;
+                          if (_position > maxWidth - 60) {
+                            _position = maxWidth - 60;
+                          }
+                        });
+                      }
+                    },
+                    onHorizontalDragEnd: (details) {
+                      if (_position > maxWidth * 0.75) {
+                        setState(() {
+                          _position = maxWidth - 60;
+                          _isCompleted = true; // Show success tick
+                        });
+                        _animationController.forward();
+                        widget.onSlide();
+
+                        // Debugging: Print to see if the flag is set
+                        print("Success tick shown");
+
+                        // Delay to reset after showing the success tick
+                        Future.delayed(const Duration(seconds: 2), () {
+                          if (mounted) {
+                            setState(() {
+                              _isCompleted = false;
+                              _position = 0; // Reset position for next slide
+                            });
+
+                            // Debugging: Print to ensure reset happens after delay
+                            print("State reset after delay");
+                          }
+                        });
+                      } else {
+                        setState(() {
+                          _position = 0;
+                        });
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 10,
+                        top: 5,
+                      ),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        margin: EdgeInsets.only(left: _position),
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0057FF),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Transform.scale(
+                            scale: _scaleValue, // Apply scale
+                            child: SvgPicture.asset(
+                              'assets/svgs/arrow-up.svg',
+                              width: 24,
+                              height: 24, // Smaller icon size
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+}
+
+class SlideToActButton extends StatelessWidget {
+  final String labelText;
+  final Color backgroundColor;
+  final Color sliderButtonColor;
+  final Color sliderButtonIconColor;
+  final String sliderButtonIcon;
+  final Future<void> Function() onSubmit;
+  final double height;
+  final double borderRadius;
+  final double sliderButtonSize;
+  final bool reversed;
+  final Duration animationDuration;
+  final double width;
+
+  const SlideToActButton({
+    Key? key,
+    required this.labelText,
+    required this.onSubmit,
+    this.backgroundColor = Colors.blue,
+    this.sliderButtonColor = Colors.white,
+    this.sliderButtonIconColor = Colors.white,
+    this.sliderButtonIcon = 'assets/svgs/arrow-up.svg',
+    this.height = 60,
+    this.width = double.infinity,
+    this.borderRadius = 30,
+    this.sliderButtonSize = 24,
+    this.reversed = false,
+    this.animationDuration = const Duration(seconds: 1),
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final GlobalKey<SlideActionState> _key = GlobalKey();
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        width: width,
+        child: SlideAction(
+          key: _key,
+          onSubmit: onSubmit,
+          height: height,
+          borderRadius: borderRadius,
+          innerColor: backgroundColor,
+          outerColor: sliderButtonColor,
+          sliderButtonIcon: Container(
+            width: sliderButtonSize,
+            height: sliderButtonSize,
+            child: SvgPicture.asset(
+              sliderButtonIcon,
+              color: sliderButtonIconColor,
+              fit: BoxFit.contain,
+            ),
+          ),
+          sliderButtonIconSize: sliderButtonSize,
+          animationDuration: animationDuration,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20),
+            child: Center(
+              child: Text(
+                labelText,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
