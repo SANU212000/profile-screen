@@ -10,7 +10,7 @@ Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding:
-          EdgeInsets.symmetric(vertical: 13, horizontal: isSelected ? 56 : 46),
+          EdgeInsets.symmetric(vertical: 12, horizontal: isSelected ? 56 : 50),
       decoration: BoxDecoration(
         color: isSelected ? Colors.green : Colors.grey[900],
         borderRadius: BorderRadius.circular(30),
@@ -30,6 +30,7 @@ InputDecoration buildInputDecoration(String label) {
     labelStyle: TextStyle(
       color: Color.fromRGBO(180, 177, 180, 1),
       fontFamily: 'Inter',
+      fontSize: 14,
       fontWeight: FontWeight.w600,
     ),
     filled: true,
@@ -42,14 +43,14 @@ InputDecoration buildInputDecoration(String label) {
       borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: Colors.green),
     ),
-    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+    contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
   );
 }
 
 Widget customInputField(String hint, TextEditingController controller) {
   return TextField(
     controller: controller,
-    style: const TextStyle(color: Colors.white),
+    style: const TextStyle(color: Colors.white, fontSize: 16),
     decoration: buildInputDecoration(hint),
   );
 }
@@ -80,32 +81,25 @@ class CustomEllipse extends StatelessWidget {
       top: top,
       left: left,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(height / 2), // Creates an ellipse
+        borderRadius: BorderRadius.circular(height / 2),
         child: Container(
           width: width,
           height: height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin:
-                  Alignment.topLeft, // Adjusted direction for smoother spread
-              end: Alignment.bottomRight, // Gradients spread diagonally
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
-                backgroundColor
-                    .withOpacity(opacity), // Higher opacity to start smooth
-                backgroundColor.withOpacity(
-                    opacity * 0.8), // Less opacity to smooth out the transition
+                backgroundColor.withOpacity(opacity),
+                backgroundColor.withOpacity(opacity * 0.8),
               ],
-              stops: [
-                0.0,
-                1.0
-              ], // Spread evenly, but with smoother opacity transition
+              stops: [0.0, 1.0],
             ),
           ),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: blurRadius, sigmaY: blurRadius),
             child: Container(
-              color: Colors
-                  .transparent, // Keeps the blur effect while allowing gradient behind
+              color: Colors.transparent,
             ),
           ),
         ),
@@ -188,6 +182,7 @@ class DraggableFormCard extends StatefulWidget {
 
 class _DraggableFormCardState extends State<DraggableFormCard> {
   String selectedGender = '';
+  double childSize = 0.57;
 
   void onGenderSelected(String gender) {
     setState(() {
@@ -197,83 +192,131 @@ class _DraggableFormCardState extends State<DraggableFormCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.57,
-        minChildSize: 0.57,
-        maxChildSize: 0.85,
-        builder: (context, scrollController) {
-          return Card(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-            ),
-            elevation: 10,
-            color: Colors.black,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Hey, Tell me about you!",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SvgPicture.asset(
-                      'assets/svgs/Vector.svg',
-                      width: 49,
-                      height: 6,
-                    ),
-                    const SizedBox(height: 15),
+    return Stack(
+      children: [
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.6,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              scrollController.addListener(() {
+                if (scrollController.hasClients) {
+                  setState(() {
+                    childSize = scrollController.position.pixels /
+                        scrollController.position.maxScrollExtent;
+                  });
+                }
+              });
 
-                    // Gender Selection
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              return Card(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                elevation: 10,
+                color: Colors.black,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        genderButton("Male", selectedGender == "Male", () {
-                          onGenderSelected("Male");
-                        }),
-                        const SizedBox(width: 15),
-                        genderButton("Female", selectedGender == "Female", () {
-                          onGenderSelected("Female");
-                        }),
+                        Text(
+                          "Hey, Tell me about you!",
+                          style: TextStyle(
+                            color: Color.fromRGBO(255, 255, 255, 1),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        SvgPicture.asset(
+                          'assets/svgs/Vector.svg',
+                          width: 49,
+                          height: 6,
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            genderButton("Male", selectedGender == "Male", () {
+                              onGenderSelected("Male");
+                            }),
+                            const SizedBox(width: 15),
+                            genderButton("Female", selectedGender == "Female",
+                                () {
+                              onGenderSelected("Female");
+                            }),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        customInputField(
+                            "Your good name", widget.nameController),
+                        const SizedBox(height: 12),
+                        customInputField(
+                            "How old are you?", widget.ageController),
+                        const SizedBox(height: 12),
+                        CustomDropdownField(
+                          controller: widget.locationController,
+                          items: [
+                            "New York",
+                            "London",
+                            "Paris",
+                            "Tokyo",
+                            'Mumbai'
+                          ],
+                          hint: "Location",
+                          svgIconPath: 'assets/svgs/tabler_location-filled.svg',
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
-                    const SizedBox(height: 16),
-
-                    // Input Fields
-                    customInputField("Your good name", widget.nameController),
-                    const SizedBox(height: 16),
-                    customInputField("How old are you?", widget.ageController),
-                    const SizedBox(height: 16),
-                    CustomDropdownField(
-                      controller: widget.locationController,
-                      items: ["New York", "London", "Paris", "Tokyo", 'Mumbai'],
-                      hint: "Location",
-                      svgIconPath: 'assets/svgs/tabler_location-filled.svg',
-                    ),
-
-                    const SizedBox(height: 20),
-                  ],
+                  ),
                 ),
+              );
+            },
+          ),
+        ),
+        if (childSize > 0.7)
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            height: 250,
+            child: Container(
+              color: Colors.black.withOpacity(0.7),
+              child: Column(
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/image2.png', // Replace with your profile image path
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    "User Name",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+      ],
     );
   }
 }
@@ -350,6 +393,8 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                 borderRadius: BorderRadius.circular(32),
                 borderSide: BorderSide.none,
               ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 9.0, horizontal: 20.0),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 20, top: 10, bottom: 10),
                 child: SvgPicture.asset(
@@ -367,7 +412,7 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
                 color: widget.controller.text.isEmpty
                     ? Colors.white54
                     : Colors.white,
-                fontSize: 16,
+                fontSize: 15,
                 fontFamily: 'Inter',
                 fontWeight: FontWeight.w600,
               ),
@@ -526,7 +571,6 @@ class _SliderButtonState extends State<SliderButton>
                               _position = 0; // Reset position for next slide
                             });
 
-                            // Debugging: Print to ensure reset happens after delay
                             print("State reset after delay");
                           }
                         });
@@ -659,4 +703,234 @@ class SlideToActButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class CustomEllipsePostion extends StatelessWidget {
+  final double width;
+  final double height;
+  final double top;
+  final double bottom;
+  final double left;
+  final double right;
+  final BoxFit fit;
+
+  const CustomEllipsePostion({
+    super.key,
+    this.width = 262.1127014160156,
+    this.height = 262.3527526855469,
+    this.top = 0.0,
+    this.bottom = 0.0,
+    this.left = 0.0,
+    this.right = 0.0,
+    this.fit = BoxFit.cover,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+      child: SvgPicture.asset(
+        'assets/ellipse/Ellipse.svg',
+        width: width,
+        height: height,
+        fit: fit,
+      ),
+    );
+  }
+}
+
+class CustomEllipsePainter extends CustomPainter {
+  final double radius;
+  final Color color;
+  final double angle;
+
+  CustomEllipsePainter({
+    required this.radius,
+    required this.color,
+    required this.angle,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = RadialGradient(
+        colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
+        stops: [0.0, 0.8],
+      ).createShader(Rect.fromCircle(
+          center: Offset(size.width / 2, size.height / 2), radius: radius));
+
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), radius, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class SquareWithConnectedBoxes extends StatelessWidget {
+  final double size;
+
+  const SquareWithConnectedBoxes({
+    Key? key,
+    this.size = 500.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    int boxesPerRow = 12;
+    return Center(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            width: 1.3,
+            color: Colors.transparent,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(255, 255, 255, 0.021), // Start color
+                  Color.fromRGBO(153, 153, 153, 0), // End color (transparent)
+                ],
+                stops: [0.0, 1.0],
+              ),
+            ),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: boxesPerRow,
+                crossAxisSpacing: 0.0,
+                mainAxisSpacing: 0.0,
+              ),
+              itemCount: 200,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Color.fromRGBO(153, 153, 153, 0.05),
+                      width: 1.0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// class GradientWidget extends StatelessWidget {
+//   final double width;
+//   final double height;
+
+//   const GradientWidget({
+//     Key? key,
+//     this.width = 200.0,
+//     this.height = 400.0,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Positioned(
+//       top: 0.0,
+//       left: 0.0,
+//       right: 0.0,
+//       child: Container(
+//         width: width,
+//         height: height,
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             begin: Alignment.topCenter, // Start gradient from the top
+//             end: Alignment.bottomCenter, // End gradient at the bottom
+//             colors: [
+//               Colors.black.withOpacity(0.7), // Dark color at the top
+//               Colors.transparent, // Transparent color at the bottom
+//             ],
+//             stops: [0.0, 1.0],
+//           ),
+//           borderRadius:
+//               BorderRadius.circular(10), // Optional, for rounded corners
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final VoidCallback onBackPressed;
+  final VoidCallback onSharePressed;
+
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    required this.onBackPressed,
+    required this.onSharePressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(64, 51, 42, 42),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: onBackPressed,
+          ),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Inter',
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.share, color: Colors.white),
+            onPressed: onSharePressed,
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80); // Height of AppBar
+}
+
+void onBackPressed() {
+  print("Share pressed");
+}
+
+void onSharePressed() {
+  print("Share pressed");
 }
