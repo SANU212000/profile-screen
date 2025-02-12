@@ -12,12 +12,15 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: CustomAppBar(
-          title: "Profile",
-          onBackPressed: () => onBackPressed,
-          onSharePressed: onSharePressed,
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: CustomAppBar(
+            title: "Profile",
+            onBackPressed: onBackPressed,
+            onSharePressed: onSharePressed,
+          ),
         ),
-        backgroundColor: Colors.black,
         body: Stack(
           children: [
             Positioned.fill(
@@ -42,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Positioned(top: 0, child: SquareWithConnectedBoxes()),
+                  Positioned(top: -100, child: SquareWithConnectedBoxes()),
                   Positioned(
                     top: 98,
                     left: -153,
@@ -71,11 +74,11 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: 40,
-              left: MediaQuery.of(context).size.width / 2 - 125,
+              top: 90,
+              left: MediaQuery.of(context).size.width / 2 - 115,
               child: Container(
-                width: 250,
-                height: 300,
+                width: 230,
+                height: 252,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   image: const DecorationImage(
@@ -99,7 +102,7 @@ class ProfileScreen extends StatelessWidget {
                 onSubmit: () async {
                   print("Action Completed!");
                 },
-                backgroundColor: const Color.fromRGBO(109, 88, 247, 1),
+                backgroundColor: Color(0xFF7660FD),
               ),
             ),
           ],

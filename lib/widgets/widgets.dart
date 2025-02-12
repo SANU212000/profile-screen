@@ -5,20 +5,27 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
 Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
+  double baseWidth = 153;
+  double selectedWidth = baseWidth + 20;
+
   return GestureDetector(
     onTap: onTap,
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      padding:
-          EdgeInsets.symmetric(vertical: 12, horizontal: isSelected ? 56 : 50),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      width: isSelected ? selectedWidth : baseWidth,
       decoration: BoxDecoration(
         color: isSelected ? Colors.green : Colors.grey[900],
         borderRadius: BorderRadius.circular(30),
       ),
       curve: Curves.easeInOut,
+      alignment: Alignment.center,
       child: Text(
         text,
-        style: GoogleFonts.poppins(color: Colors.white),
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     ),
   );
@@ -113,12 +120,12 @@ class GradientBorderWidget extends StatelessWidget {
   final double height;
   final Widget child;
 
-  GradientBorderWidget({
-    Key? key,
+  const GradientBorderWidget({
+    super.key,
     this.width = 200.0,
     this.height = 200.0,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +204,8 @@ class _DraggableFormCardState extends State<DraggableFormCard> {
         Align(
           alignment: Alignment.bottomCenter,
           child: DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            minChildSize: 0.6,
+            initialChildSize: 0.58,
+            minChildSize: 0.57,
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               scrollController.addListener(() {
@@ -209,75 +216,82 @@ class _DraggableFormCardState extends State<DraggableFormCard> {
                   });
                 }
               });
-
-              return Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+              return SizedBox(
+                width: double.infinity,
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(40),
+                      topRight: Radius.circular(40),
+                    ),
                   ),
-                ),
-                elevation: 10,
-                color: Colors.black,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Hey, Tell me about you!",
-                          style: TextStyle(
-                            color: Color.fromRGBO(255, 255, 255, 1),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Inter',
-                            letterSpacing: 1.2,
+                  elevation: 10,
+                  color: Colors.black,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 12,
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        SvgPicture.asset(
-                          'assets/svgs/Vector.svg',
-                          width: 49,
-                          height: 6,
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            genderButton("Male", selectedGender == "Male", () {
-                              onGenderSelected("Male");
-                            }),
-                            const SizedBox(width: 15),
-                            genderButton("Female", selectedGender == "Female",
-                                () {
-                              onGenderSelected("Female");
-                            }),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        customInputField(
-                            "Your good name", widget.nameController),
-                        const SizedBox(height: 12),
-                        customInputField(
-                            "How old are you?", widget.ageController),
-                        const SizedBox(height: 12),
-                        CustomDropdownField(
-                          controller: widget.locationController,
-                          items: [
-                            "New York",
-                            "London",
-                            "Paris",
-                            "Tokyo",
-                            'Mumbai'
-                          ],
-                          hint: "Location",
-                          svgIconPath: 'assets/svgs/tabler_location-filled.svg',
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                          Text(
+                            "Hey, Tell me about you!",
+                            style: TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 1),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SvgPicture.asset(
+                            'assets/svgs/Vector.svg',
+                            width: 49,
+                            height: 6,
+                          ),
+                          const SizedBox(height: 25),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              genderButton("Male", selectedGender == "Male",
+                                  () {
+                                onGenderSelected("Male");
+                              }),
+                              const SizedBox(width: 15),
+                              genderButton("Female", selectedGender == "Female",
+                                  () {
+                                onGenderSelected("Female");
+                              }),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          customInputField(
+                              "Your good name", widget.nameController),
+                          const SizedBox(height: 12),
+                          customInputField(
+                              "How old are you?", widget.ageController),
+                          const SizedBox(height: 12),
+                          CustomDropdownField(
+                            controller: widget.locationController,
+                            items: [
+                              "New York",
+                              "London",
+                              "Paris",
+                              "Tokyo",
+                              'Mumbai'
+                            ],
+                            hint: "Location",
+                            svgIconPath:
+                                'assets/svgs/tabler_location-filled.svg',
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -297,7 +311,7 @@ class _DraggableFormCardState extends State<DraggableFormCard> {
                 children: [
                   ClipOval(
                     child: Image.asset(
-                      'assets/images/image2.png', // Replace with your profile image path
+                      'assets/images/image2.png',
                       width: 120,
                       height: 120,
                       fit: BoxFit.cover,
@@ -328,12 +342,12 @@ class CustomDropdownField extends StatefulWidget {
   final String svgIconPath;
 
   const CustomDropdownField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.items,
     this.hint = "Select an option",
     required this.svgIconPath,
-  }) : super(key: key);
+  });
 
   @override
   _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
@@ -396,11 +410,14 @@ class _CustomDropdownFieldState extends State<CustomDropdownField> {
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 9.0, horizontal: 20.0),
               suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 20, top: 10, bottom: 10),
-                child: SvgPicture.asset(
-                  widget.svgIconPath,
-                  width: 16,
-                  height: 16,
+                padding: const EdgeInsets.only(right: 20),
+                child: SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: SvgPicture.asset(
+                    widget.svgIconPath,
+                    fit: BoxFit.scaleDown,
+                  ),
                 ),
               ),
             ),
@@ -555,20 +572,18 @@ class _SliderButtonState extends State<SliderButton>
                       if (_position > maxWidth * 0.75) {
                         setState(() {
                           _position = maxWidth - 60;
-                          _isCompleted = true; // Show success tick
+                          _isCompleted = true;
                         });
                         _animationController.forward();
                         widget.onSlide();
 
-                        // Debugging: Print to see if the flag is set
                         print("Success tick shown");
 
-                        // Delay to reset after showing the success tick
                         Future.delayed(const Duration(seconds: 2), () {
                           if (mounted) {
                             setState(() {
                               _isCompleted = false;
-                              _position = 0; // Reset position for next slide
+                              _position = 0;
                             });
 
                             print("State reset after delay");
@@ -644,7 +659,7 @@ class SlideToActButton extends StatelessWidget {
   final double width;
 
   const SlideToActButton({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.onSubmit,
     this.backgroundColor = Colors.blue,
@@ -657,7 +672,7 @@ class SlideToActButton extends StatelessWidget {
     this.sliderButtonSize = 24,
     this.reversed = false,
     this.animationDuration = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -665,7 +680,7 @@ class SlideToActButton extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Container(
+      child: SizedBox(
         width: width,
         child: SlideAction(
           key: _key,
@@ -674,7 +689,7 @@ class SlideToActButton extends StatelessWidget {
           borderRadius: borderRadius,
           innerColor: backgroundColor,
           outerColor: sliderButtonColor,
-          sliderButtonIcon: Container(
+          sliderButtonIcon: SizedBox(
             width: sliderButtonSize,
             height: sliderButtonSize,
             child: SvgPicture.asset(
@@ -776,13 +791,13 @@ class SquareWithConnectedBoxes extends StatelessWidget {
   final double size;
 
   const SquareWithConnectedBoxes({
-    Key? key,
+    super.key,
     this.size = 500.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    int boxesPerRow = 12;
+    int boxesPerRow = 13;
     return Center(
       child: Container(
         width: size,
@@ -803,8 +818,8 @@ class SquareWithConnectedBoxes extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromRGBO(255, 255, 255, 0.021), // Start color
-                  Color.fromRGBO(153, 153, 153, 0), // End color (transparent)
+                  Color.fromRGBO(255, 255, 255, 0.021),
+                  Color.fromRGBO(153, 153, 153, 0),
                 ],
                 stops: [0.0, 1.0],
               ),
@@ -834,43 +849,6 @@ class SquareWithConnectedBoxes extends StatelessWidget {
   }
 }
 
-// class GradientWidget extends StatelessWidget {
-//   final double width;
-//   final double height;
-
-//   const GradientWidget({
-//     Key? key,
-//     this.width = 200.0,
-//     this.height = 400.0,
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Positioned(
-//       top: 0.0,
-//       left: 0.0,
-//       right: 0.0,
-//       child: Container(
-//         width: width,
-//         height: height,
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter, // Start gradient from the top
-//             end: Alignment.bottomCenter, // End gradient at the bottom
-//             colors: [
-//               Colors.black.withOpacity(0.7), // Dark color at the top
-//               Colors.transparent, // Transparent color at the bottom
-//             ],
-//             stops: [0.0, 1.0],
-//           ),
-//           borderRadius:
-//               BorderRadius.circular(10), // Optional, for rounded corners
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback onBackPressed;
@@ -886,37 +864,47 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      width: 200,
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color.fromARGB(255, 0, 0, 0),
-            Color.fromARGB(64, 51, 42, 42),
-            Colors.transparent,
+            const Color.fromARGB(148, 0, 0, 0), // Black color at the top
+            Colors.transparent, // Transparent color at the bottom
           ],
         ),
       ),
-      padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 10),
+      padding: const EdgeInsets.only(top: 40, left: 26, right: 26, bottom: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-            onPressed: onBackPressed,
+          GestureDetector(
+            onTap: onBackPressed,
+            child: SvgPicture.asset(
+              'assets/svgs/downbutton.svg',
+              color: Colors.white,
+              width: 24,
+              height: 24,
+            ),
           ),
           Text(
             title,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               fontFamily: 'Inter',
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.white),
-            onPressed: onSharePressed,
+          GestureDetector(
+            onTap: onSharePressed,
+            child: SvgPicture.asset(
+              'assets/svgs/shareicon.svg',
+              color: Colors.white,
+              width: 20,
+              height: 20,
+            ),
           ),
         ],
       ),
@@ -924,11 +912,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(80); // Height of AppBar
+  Size get preferredSize => const Size.fromHeight(80);
 }
 
 void onBackPressed() {
-  print("Share pressed");
+  print("Back pressed");
 }
 
 void onSharePressed() {
