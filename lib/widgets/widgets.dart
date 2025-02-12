@@ -479,7 +479,7 @@ class _SliderButtonState extends State<SliderButton>
       duration: const Duration(milliseconds: 400),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 2.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
   }
@@ -501,8 +501,8 @@ class _SliderButtonState extends State<SliderButton>
               scale: _scaleAnimation,
               child: Container(
                 key: const ValueKey("success"),
-                width: 30,
-                height: 50,
+                width: 40,
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(30),
@@ -620,11 +620,11 @@ class _SliderButtonState extends State<SliderButton>
                         ),
                         child: Center(
                           child: Transform.scale(
-                            scale: _scaleValue, // Apply scale
+                            scale: _scaleValue,
                             child: SvgPicture.asset(
                               'assets/svgs/arrow-up.svg',
                               width: 24,
-                              height: 24, // Smaller icon size
+                              height: 24,
                             ),
                           ),
                         ),
@@ -648,8 +648,7 @@ class SlideToActButton extends StatelessWidget {
   final String labelText;
   final Color backgroundColor;
   final Color sliderButtonColor;
-  final Color sliderButtonIconColor;
-  final String sliderButtonIcon;
+  final String sliderButtonIcon; // Path to your SVG image
   final Future<void> Function() onSubmit;
   final double height;
   final double borderRadius;
@@ -664,12 +663,11 @@ class SlideToActButton extends StatelessWidget {
     required this.onSubmit,
     this.backgroundColor = Colors.blue,
     this.sliderButtonColor = Colors.white,
-    this.sliderButtonIconColor = Colors.white,
-    this.sliderButtonIcon = 'assets/svgs/arrow-up.svg',
+    this.sliderButtonIcon = 'assets/svgs/Group 44.svg', // Path to your SVG
     this.height = 60,
     this.width = double.infinity,
-    this.borderRadius = 30,
-    this.sliderButtonSize = 24,
+    this.borderRadius = 80,
+    this.sliderButtonSize = 20,
     this.reversed = false,
     this.animationDuration = const Duration(seconds: 1),
   });
@@ -679,7 +677,7 @@ class SlideToActButton extends StatelessWidget {
     final GlobalKey<SlideActionState> _key = GlobalKey();
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(10),
       child: SizedBox(
         width: width,
         child: SlideAction(
@@ -692,10 +690,12 @@ class SlideToActButton extends StatelessWidget {
           sliderButtonIcon: SizedBox(
             width: sliderButtonSize,
             height: sliderButtonSize,
-            child: SvgPicture.asset(
-              sliderButtonIcon,
-              color: sliderButtonIconColor,
-              fit: BoxFit.contain,
+            child: Transform.scale(
+              scale: 2,
+              child: SvgPicture.asset(
+                sliderButtonIcon,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           sliderButtonIconSize: sliderButtonSize,
@@ -870,8 +870,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            const Color.fromARGB(148, 0, 0, 0), // Black color at the top
-            Colors.transparent, // Transparent color at the bottom
+            const Color.fromARGB(148, 0, 0, 0),
+            Colors.transparent,
           ],
         ),
       ),

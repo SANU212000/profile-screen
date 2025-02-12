@@ -30,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
                   Positioned(
                     child: Image.asset(
                       'assets/images/Frame.png',
-                      fit: BoxFit.fitWidth,
+                      fit: BoxFit.fill,
                     ),
                   ),
                   Positioned(
