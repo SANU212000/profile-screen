@@ -204,8 +204,8 @@ class _DraggableFormCardState extends State<DraggableFormCard> {
         Align(
           alignment: Alignment.bottomCenter,
           child: DraggableScrollableSheet(
-            initialChildSize: 0.58,
-            minChildSize: 0.57,
+            initialChildSize: 0.61,
+            minChildSize: 0.60,
             maxChildSize: 0.85,
             builder: (context, scrollController) {
               scrollController.addListener(() {
@@ -354,88 +354,82 @@ class CustomDropdownField extends StatefulWidget {
 }
 
 class _CustomDropdownFieldState extends State<CustomDropdownField> {
+  String? selectedValue;
+  bool isExpanded = false;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        isExpanded = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        final selectedValue = await showDialog<String>(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: Colors.grey[900],
-            title: Text(
-              widget.hint,
-              style: const TextStyle(
-                color: Color.fromARGB(137, 212, 34, 34),
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: widget.items.map((item) {
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop(item);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        item,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 5),
+      curve: Curves.easeInOut,
+      height: isExpanded ? 80 : 65,
+      child: DropdownButtonFormField<String>(
+        focusNode: _focusNode,
+        value: selectedValue,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.grey[900],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: SvgPicture.asset(
+                widget.svgIconPath,
+                fit: BoxFit.scaleDown,
               ),
             ),
           ),
-        );
-        if (selectedValue != null) {
-          setState(() {
-            widget.controller.text = selectedValue;
-          });
-        }
-      },
-      child: Stack(
-        children: [
-          InputDecorator(
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.grey[900],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(32),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 9.0, horizontal: 20.0),
-              suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: SvgPicture.asset(
-                    widget.svgIconPath,
-                    fit: BoxFit.scaleDown,
-                  ),
-                ),
-              ),
-            ),
+        ),
+        hint: Text(
+          widget.hint,
+          style: TextStyle(
+            color: isExpanded ? Colors.white : Colors.white54,
+            fontSize: isExpanded ? 18 : 15,
+            fontWeight: isExpanded ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        dropdownColor: Colors.grey[900],
+        style: const TextStyle(color: Colors.white),
+        items: widget.items.map((String item) {
+          return DropdownMenuItem<String>(
+            value: item,
             child: Text(
-              widget.controller.text.isEmpty
-                  ? widget.hint
-                  : widget.controller.text,
-              style: TextStyle(
-                color: widget.controller.text.isEmpty
-                    ? Colors.white54
-                    : Colors.white,
-                fontSize: 15,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-              ),
+              item,
+              style: const TextStyle(color: Colors.white),
             ),
-          ),
-        ],
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedValue = newValue;
+            widget.controller.text = newValue!;
+          });
+        },
+        icon: const SizedBox.shrink(),
       ),
     );
   }
@@ -648,7 +642,7 @@ class SlideToActButton extends StatelessWidget {
   final String labelText;
   final Color backgroundColor;
   final Color sliderButtonColor;
-  final String sliderButtonIcon; // Path to your SVG image
+  final String sliderButtonIcon;
   final Future<void> Function() onSubmit;
   final double height;
   final double borderRadius;
