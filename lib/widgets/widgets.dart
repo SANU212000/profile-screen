@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:slide_to_act/slide_to_act.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:shimmer/shimmer.dart';
 
 Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
   double baseWidth = 153;
@@ -915,4 +917,34 @@ void onBackPressed() {
 
 void onSharePressed() {
   print("Share pressed");
+}
+
+class ModelViewerWidget extends StatefulWidget {
+  final String modelPath;
+
+  const ModelViewerWidget({super.key, required this.modelPath});
+
+  @override
+  State<ModelViewerWidget> createState() => _ModelViewerWidgetState();
+}
+
+class _ModelViewerWidgetState extends State<ModelViewerWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ModelViewer(
+          src: widget.modelPath,
+          alt: "A 3D model",
+          ar: false,
+          autoRotate: false,
+          cameraControls: true,
+          disableZoom: true,
+          cameraOrbit: "0deg 90deg auto",
+          minCameraOrbit: "auto 90deg auto",
+          maxCameraOrbit: "auto 90deg auto",
+        ),
+      ],
+    );
+  }
 }

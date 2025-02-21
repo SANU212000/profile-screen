@@ -74,18 +74,13 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: 90,
+              top: 70,
               left: MediaQuery.of(context).size.width / 2 - 115,
               child: Container(
                 width: 230,
-                height: 252,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/image2.png'),
-                    fit: BoxFit.contain,
-                  ),
-                ),
+                height: 352,
+                child: ModelViewerWidget(
+                    modelPath: 'assets/3d_model/base_basic_shaded.glb'),
               ),
             ),
             DraggableFormCard(
