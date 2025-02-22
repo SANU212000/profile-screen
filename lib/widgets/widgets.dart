@@ -4,7 +4,67 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
-import 'package:shimmer/shimmer.dart';
+
+class ProfileBackgroundWithModel extends StatelessWidget {
+  final String modelPath;
+
+  const ProfileBackgroundWithModel({super.key, required this.modelPath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          top: 739,
+          left: -178,
+          child: CustomPaint(
+            size: const Size(262, 262),
+            painter: CustomEllipsePainter(
+              radius: 300,
+              color: const Color.fromRGBO(232, 204, 159, 1),
+              angle: 1,
+            ),
+          ),
+        ),
+        Positioned(top: -100, child: SquareWithConnectedBoxes()),
+        Positioned(
+          top: 98,
+          left: -153,
+          child: CustomPaint(
+            size: const Size(262, 262),
+            painter: CustomEllipsePainter(
+              radius: 300,
+              color: const Color.fromRGBO(232, 204, 159, 1),
+              angle: 1,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 130,
+          left: 233,
+          child: CustomPaint(
+            size: const Size(162, 162),
+            painter: CustomEllipsePainter(
+              radius: 300,
+              color: const Color.fromRGBO(232, 204, 159, 1),
+              angle: 0,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 70,
+          left: MediaQuery.of(context).size.width / 2 - 115,
+          child: SizedBox(
+            width: 230,
+            height: 352,
+            child: ModelViewerWidget(modelPath: modelPath),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
   double baseWidth = 153;
@@ -173,166 +233,260 @@ class GradientBorderPainter extends CustomPainter {
   }
 }
 
-class DraggableFormCard extends StatefulWidget {
+// class DraggableFormCard extends StatefulWidget {
+//   final TextEditingController nameController;
+//   final TextEditingController ageController;
+//   final TextEditingController locationController;
+
+//   const DraggableFormCard({
+//     Key? key,
+//     required this.nameController,
+//     required this.ageController,
+//     required this.locationController,
+//   }) : super(key: key);
+
+//   @override
+//   _DraggableFormCardState createState() => _DraggableFormCardState();
+// }
+
+// class _DraggableFormCardState extends State<DraggableFormCard> {
+//   String selectedGender = '';
+//   double childSize = 0.57;
+
+//   void onGenderSelected(String gender) {
+//     setState(() {
+//       selectedGender = gender;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       children: [
+//         Align(
+//           alignment: Alignment.bottomCenter,
+//           child: DraggableScrollableSheet(
+//             initialChildSize: 0.61,
+//             minChildSize: 0.60,
+//             maxChildSize: 0.85,
+//             builder: (context, scrollController) {
+//               scrollController.addListener(() {
+//                 if (scrollController.hasClients) {
+//                   setState(() {
+//                     childSize = scrollController.position.pixels /
+//                         scrollController.position.maxScrollExtent;
+//                   });
+//                 }
+//               });
+//               return SizedBox(
+//                 width: double.infinity,
+//                 child: Card(
+//                   margin: EdgeInsets.zero,
+//                   shape: const RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.only(
+//                       topLeft: Radius.circular(40),
+//                       topRight: Radius.circular(40),
+//                     ),
+//                   ),
+//                   elevation: 10,
+//                   color: Colors.black,
+//                   child: SingleChildScrollView(
+//                     controller: scrollController,
+//                     child: Padding(
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 20, vertical: 20),
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.center,
+//                         children: [
+//                           SizedBox(
+//                             height: 12,
+//                           ),
+//                           Text(
+//                             "Hey, Tell me about you!",
+//                             style: TextStyle(
+//                               color: Color.fromRGBO(255, 255, 255, 1),
+//                               fontSize: 20,
+//                               fontWeight: FontWeight.w600,
+//                               fontFamily: 'Inter',
+//                             ),
+//                           ),
+//                           const SizedBox(height: 10),
+//                           SvgPicture.asset(
+//                             'assets/svgs/Vector.svg',
+//                             width: 49,
+//                             height: 6,
+//                           ),
+//                           const SizedBox(height: 25),
+//                           Row(
+//                             mainAxisAlignment: MainAxisAlignment.center,
+//                             children: [
+//                               genderButton("Male", selectedGender == "Male",
+//                                   () {
+//                                 onGenderSelected("Male");
+//                               }),
+//                               const SizedBox(width: 15),
+//                               genderButton("Female", selectedGender == "Female",
+//                                   () {
+//                                 onGenderSelected("Female");
+//                               }),
+//                             ],
+//                           ),
+//                           const SizedBox(height: 12),
+//                           customInputField(
+//                               "Your good name", widget.nameController),
+//                           const SizedBox(height: 12),
+//                           customInputField(
+//                               "How old are you?", widget.ageController),
+//                           const SizedBox(height: 12),
+//                           CustomDropdownField(
+//                             controller: widget.locationController,
+//                             items: [
+//                               "New York",
+//                               "London",
+//                               "Paris",
+//                               "Tokyo",
+//                               'Mumbai'
+//                             ],
+//                             hint: "Location",
+//                             svgIconPath:
+//                                 'assets/svgs/tabler_location-filled.svg',
+//                           ),
+//                           const SizedBox(height: 20),
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//         if (childSize > 0.7)
+//           Positioned(
+//             top: 10,
+//             left: 10,
+//             right: 10,
+//             height: 250,
+//             child: Container(
+//               color: Colors.black.withOpacity(0.7),
+//               child: Column(
+//                 children: [
+//                   ClipOval(
+//                     child: Image.asset(
+//                       'assets/images/image2.png',
+//                       width: 120,
+//                       height: 120,
+//                       fit: BoxFit.cover,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 15),
+//                   const Text(
+//                     "User Name",
+//                     style: TextStyle(
+//                       color: Colors.white,
+//                       fontSize: 18,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//       ],
+//     );
+//   }
+// }
+
+class StaticFormCard extends StatefulWidget {
   final TextEditingController nameController;
   final TextEditingController ageController;
   final TextEditingController locationController;
+  final Function(String) onGenderChanged; // Callback function
 
-  const DraggableFormCard({
+  const StaticFormCard({
     Key? key,
     required this.nameController,
     required this.ageController,
     required this.locationController,
+    required this.onGenderChanged, // Pass callback
   }) : super(key: key);
 
   @override
-  _DraggableFormCardState createState() => _DraggableFormCardState();
+  _StaticFormCardState createState() => _StaticFormCardState();
 }
 
-class _DraggableFormCardState extends State<DraggableFormCard> {
+class _StaticFormCardState extends State<StaticFormCard> {
   String selectedGender = '';
-  double childSize = 0.57;
 
   void onGenderSelected(String gender) {
     setState(() {
       selectedGender = gender;
     });
+    widget.onGenderChanged(gender); // Notify parent
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: DraggableScrollableSheet(
-            initialChildSize: 0.61,
-            minChildSize: 0.60,
-            maxChildSize: 0.85,
-            builder: (context, scrollController) {
-              scrollController.addListener(() {
-                if (scrollController.hasClients) {
-                  setState(() {
-                    childSize = scrollController.position.pixels /
-                        scrollController.position.maxScrollExtent;
-                  });
-                }
-              });
-              return SizedBox(
-                width: double.infinity,
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40),
-                      topRight: Radius.circular(40),
-                    ),
-                  ),
-                  elevation: 10,
-                  color: Colors.black,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 12,
-                          ),
-                          Text(
-                            "Hey, Tell me about you!",
-                            style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 1),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          SvgPicture.asset(
-                            'assets/svgs/Vector.svg',
-                            width: 49,
-                            height: 6,
-                          ),
-                          const SizedBox(height: 25),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              genderButton("Male", selectedGender == "Male",
-                                  () {
-                                onGenderSelected("Male");
-                              }),
-                              const SizedBox(width: 15),
-                              genderButton("Female", selectedGender == "Female",
-                                  () {
-                                onGenderSelected("Female");
-                              }),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          customInputField(
-                              "Your good name", widget.nameController),
-                          const SizedBox(height: 12),
-                          customInputField(
-                              "How old are you?", widget.ageController),
-                          const SizedBox(height: 12),
-                          CustomDropdownField(
-                            controller: widget.locationController,
-                            items: [
-                              "New York",
-                              "London",
-                              "Paris",
-                              "Tokyo",
-                              'Mumbai'
-                            ],
-                            hint: "Location",
-                            svgIconPath:
-                                'assets/svgs/tabler_location-filled.svg',
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: Card(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(40),
+            topRight: Radius.circular(40),
           ),
         ),
-        if (childSize > 0.7)
-          Positioned(
-            top: 10,
-            left: 10,
-            right: 10,
-            height: 250,
-            child: Container(
-              color: Colors.black.withOpacity(0.7),
-              child: Column(
+        elevation: 10,
+        color: Colors.black,
+        child: Padding(
+          padding: const EdgeInsets.all(0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 15),
+              const Text(
+                "Hey, Tell me about you!",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 10),
+              SvgPicture.asset(
+                'assets/svgs/Vector.svg',
+                width: 55,
+                height: 8,
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipOval(
-                    child: Image.asset(
-                      'assets/images/image2.png',
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    "User Name",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  genderButton("Male", selectedGender == "Male", () {
+                    onGenderSelected("Male");
+                  }),
+                  const SizedBox(width: 15),
+                  genderButton("Female", selectedGender == "Female", () {
+                    onGenderSelected("Female");
+                  }),
                 ],
               ),
-            ),
+              const SizedBox(height: 20),
+              customInputField("Your good name", widget.nameController),
+              const SizedBox(height: 15),
+              customInputField("How old are you?", widget.ageController),
+              const SizedBox(height: 10),
+              CustomDropdownField(
+                controller: widget.locationController,
+                items: ["New York", "London", "Paris", "Tokyo", 'Mumbai'],
+                hint: "Location",
+                svgIconPath: 'assets/svgs/tabler_location-filled.svg',
+              ),
+            ],
           ),
-      ],
+        ),
+      ),
     );
   }
 }
@@ -446,14 +600,14 @@ class SliderButton extends StatefulWidget {
   final TextStyle? textStyle;
 
   const SliderButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onSlide,
     this.backgroundColor = Colors.grey,
     this.sliderColor = Colors.white,
     this.textColor = Colors.black,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   @override
   _SliderButtonState createState() => _SliderButtonState();
@@ -770,7 +924,7 @@ class CustomEllipsePainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
         colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
-        stops: [0.0, 0.8],
+        stops: [0.0, 1],
       ).createShader(Rect.fromCircle(
           center: Offset(size.width / 2, size.height / 2), radius: radius));
 
@@ -921,30 +1075,218 @@ void onSharePressed() {
 
 class ModelViewerWidget extends StatefulWidget {
   final String modelPath;
+  final bool isInteractive;
+  final String scale;
+  final String cameraOrbit;
+  final String cameraTarget;
 
-  const ModelViewerWidget({super.key, required this.modelPath});
+  const ModelViewerWidget({
+    super.key,
+    required this.modelPath,
+    this.isInteractive = true,
+    this.scale = "1 1 1",
+    this.cameraOrbit = "0deg 90deg auto",
+    this.cameraTarget = "auto auto auto",
+  });
 
   @override
   State<ModelViewerWidget> createState() => _ModelViewerWidgetState();
 }
 
 class _ModelViewerWidgetState extends State<ModelViewerWidget> {
+  late String _currentModelPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentModelPath = widget.modelPath;
+  }
+
+  @override
+  void didUpdateWidget(covariant ModelViewerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.modelPath != widget.modelPath) {
+      setState(() {
+        _currentModelPath = widget.modelPath;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ModelViewer(
+      src: _currentModelPath,
+      alt: "A 3D model",
+      ar: false,
+      autoRotate: !widget.isInteractive,
+      cameraControls: widget.isInteractive,
+      disableZoom: false,
+      disablePan: false,
+      disableTap: false,
+      rotationPerSecond: "40deg",
+      cameraTarget: widget.cameraTarget,
+      cameraOrbit: widget.cameraOrbit,
+      minCameraOrbit: "auto 90deg auto",
+      maxCameraOrbit: "auto 90deg auto",
+    );
+  }
+}
+
+class CustomPaintStackwith3dModel extends StatefulWidget {
+  final String modelPath;
+
+  const CustomPaintStackwith3dModel({super.key, required this.modelPath});
+
+  @override
+  _CustomPaintStackwith3dModelState createState() =>
+      _CustomPaintStackwith3dModelState();
+}
+
+class _CustomPaintStackwith3dModelState
+    extends State<CustomPaintStackwith3dModel> {
+  late String _currentModelPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentModelPath = widget.modelPath;
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomPaintStackwith3dModel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.modelPath != widget.modelPath) {
+      setState(() {
+        _currentModelPath = widget.modelPath;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        ModelViewer(
-          src: widget.modelPath,
-          alt: "A 3D model",
-          ar: false,
-          autoRotate: false,
-          cameraControls: true,
-          disableZoom: true,
-          cameraOrbit: "0deg 90deg auto",
-          minCameraOrbit: "auto 90deg auto",
-          maxCameraOrbit: "auto 90deg auto",
+        _buildCustomPaintStack(),
+        Positioned(
+          top: 70,
+          left: MediaQuery.of(context).size.width / 2 - 115,
+          child: SizedBox(
+            width: 230,
+            height: 352,
+            child: ModelViewerWidget(
+              modelPath: _currentModelPath,
+            ),
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCustomPaintStack() {
+    return Container(
+      color: Colors.black,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: 739,
+            left: -178,
+            child: CustomPaint(
+              size: const Size(262, 262),
+              painter: CustomEllipsePainter(
+                radius: 300,
+                color: const Color.fromRGBO(232, 204, 159, 1),
+                angle: 1,
+              ),
+            ),
+          ),
+          Positioned(
+            top: -100,
+            child: SquareWithConnectedBoxes(),
+          ),
+          Positioned(
+            top: 98,
+            left: -153,
+            child: CustomPaint(
+              size: const Size(262, 262),
+              painter: CustomEllipsePainter(
+                radius: 300,
+                color: const Color.fromRGBO(232, 204, 159, 1),
+                angle: 2,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 180,
+            left: 10,
+            right: 10,
+            child: CustomPaint(
+              size: const Size(250, 250),
+              painter: CustomEllipsePainter(
+                radius: 100,
+                color: const Color.fromARGB(255, 255, 0, 0),
+                angle: 1,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 230,
+            left: 333,
+            child: CustomPaint(
+              size: const Size(262, 262),
+              painter: CustomEllipsePainter(
+                radius: 300,
+                color: const Color.fromARGB(123, 232, 204, 159),
+                angle: 0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PositionableBox extends StatelessWidget {
+  final double? left;
+  final double? right;
+  final double? top;
+  final double? bottom;
+  final double width;
+  final double height;
+  final double opacity;
+
+  const PositionableBox({
+    Key? key,
+    this.left = 70,
+    this.right = 70,
+    this.top,
+    this.bottom,
+    this.width = 100,
+    this.height = 30,
+    this.opacity = 1.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      right: right,
+      top: top,
+      bottom: bottom,
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
     );
   }
 }
