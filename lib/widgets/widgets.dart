@@ -2,69 +2,14 @@ import 'dart:ui';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:logger/logger.dart';
 
-class ProfileBackgroundWithModel extends StatelessWidget {
-  final String modelPath;
+final Logger logger = Logger();
 
-  const ProfileBackgroundWithModel({super.key, required this.modelPath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned(
-          top: 739,
-          left: -178,
-          child: CustomPaint(
-            size: const Size(262, 262),
-            painter: CustomEllipsePainter(
-              radius: 300,
-              color: const Color.fromRGBO(232, 204, 159, 1),
-              angle: 1,
-            ),
-          ),
-        ),
-        Positioned(top: -100, child: SquareWithConnectedBoxes()),
-        Positioned(
-          top: 98,
-          left: -153,
-          child: CustomPaint(
-            size: const Size(262, 262),
-            painter: CustomEllipsePainter(
-              radius: 300,
-              color: const Color.fromRGBO(232, 204, 159, 1),
-              angle: 1,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 130,
-          left: 233,
-          child: CustomPaint(
-            size: const Size(162, 162),
-            painter: CustomEllipsePainter(
-              radius: 300,
-              color: const Color.fromRGBO(232, 204, 159, 1),
-              angle: 0,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 70,
-          left: MediaQuery.of(context).size.width / 2 - 115,
-          child: SizedBox(
-            width: 230,
-            height: 352,
-            child: ModelViewerWidget(modelPath: modelPath),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// buttons and TextField--------------------------------------------------->
 
 Widget genderButton(String text, bool isSelected, VoidCallback onTap) {
   double baseWidth = 153;
@@ -124,51 +69,264 @@ Widget customInputField(String hint, TextEditingController controller) {
   );
 }
 
-class CustomEllipse extends StatelessWidget {
+class CustomDropdownField extends StatefulWidget {
+  final List<String> items;
+  final TextEditingController controller;
+  final String hint;
+  final String svgIconPath;
+
+  const CustomDropdownField({
+    Key? key,
+    required this.items,
+    required this.controller,
+    required this.hint,
+    required this.svgIconPath,
+  }) : super(key: key);
+
+  @override
+  CustomDropdownFieldState createState() => CustomDropdownFieldState();
+}
+
+class CustomDropdownFieldState extends State<CustomDropdownField>
+    with SingleTickerProviderStateMixin {
+  bool isExpanded = false;
+  String? selectedValue;
+  late AnimationController _animationController;
+  late Animation<double> _heightAnimation;
+  late Animation<double> _iconRotation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    double maxDropdownHeight = (widget.items.length * 48.0).clamp(0.0, 250.0);
+
+    _heightAnimation =
+        Tween<double>(begin: 0.0, end: maxDropdownHeight).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _iconRotation = Tween<double>(begin: 0.0, end: 1.4).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  void toggleDropdown() {
+    setState(() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
+  void selectItem(String item) {
+    setState(() {
+      selectedValue = item;
+      widget.controller.text = item;
+      toggleDropdown();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(14),
+            ),
+            child: AnimatedBuilder(
+              animation: _heightAnimation,
+              builder: (context, child) {
+                return SizedBox(
+                  height: _heightAnimation.value,
+                  child: child,
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: ListView(
+                  padding: EdgeInsets.only(top: 50, left: 20),
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  children: widget.items.map((String item) {
+                    return ListTile(
+                      title: Text(
+                        item,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () => selectItem(item),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: toggleDropdown,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: IgnorePointer(
+                    child: TextFormField(
+                      controller: widget.controller,
+                      readOnly: true,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
+                        hintText: widget.hint,
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ),
+                RotationTransition(
+                  turns: _iconRotation,
+                  child: SvgPicture.asset(
+                    widget.svgIconPath,
+                    width: 18,
+                    height: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// shapes eclipse boxes------------------------------------------------------------>
+
+class PositionableBox extends StatelessWidget {
+  final double? left;
+  final double? right;
+  final double? top;
+  final double? bottom;
   final double width;
   final double height;
-  final Color backgroundColor;
-  final double blurRadius;
   final double opacity;
-  final double top;
-  final double left;
 
-  const CustomEllipse({
-    Key? key,
-    this.width = 262.11,
-    this.height = 262.35,
-    this.backgroundColor = const Color(0xFFE8CC9F),
-    this.blurRadius = 400.0,
-    this.opacity = 0.2,
-    this.top = 98.96,
-    this.left = -153.6,
-  }) : super(key: key);
+  const PositionableBox({
+    super.key,
+    this.left = 70,
+    this.right = 70,
+    this.top,
+    this.bottom,
+    this.width = 100,
+    this.height = 30,
+    this.opacity = 1.0,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: top,
       left: left,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(height / 2),
+      right: right,
+      top: top,
+      bottom: bottom,
+      child: Opacity(
+        opacity: opacity,
         child: Container(
           width: width,
           height: height,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                backgroundColor.withOpacity(opacity),
-                backgroundColor.withOpacity(opacity * 0.8),
-              ],
-              stops: [0.0, 1.0],
-            ),
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: blurRadius, sigmaY: blurRadius),
-            child: Container(
-              color: Colors.transparent,
+        ),
+      ),
+    );
+  }
+}
+
+class SquareWithConnectedBoxes extends StatelessWidget {
+  final double size;
+
+  const SquareWithConnectedBoxes({
+    super.key,
+    this.size = 500.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    int boxesPerRow = 13;
+    return Center(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            width: 1.3,
+            color: Colors.transparent,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(255, 255, 255, 0.021),
+                  Color.fromRGBO(153, 153, 153, 0),
+                ],
+                stops: [0.0, 1.0],
+              ),
+            ),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: boxesPerRow,
+                crossAxisSpacing: 0.0,
+                mainAxisSpacing: 0.0,
+              ),
+              itemCount: 200,
+              itemBuilder: (context, index) {
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Color.fromRGBO(153, 153, 153, 0.05),
+                      width: 1.0,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -177,225 +335,7 @@ class CustomEllipse extends StatelessWidget {
   }
 }
 
-class GradientBorderWidget extends StatelessWidget {
-  final double width;
-  final double height;
-  final Widget child;
-
-  const GradientBorderWidget({
-    super.key,
-    this.width = 200.0,
-    this.height = 200.0,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: CustomPaint(
-        painter: GradientBorderPainter(),
-        child: child,
-      ),
-    );
-  }
-}
-
-class GradientBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color.fromARGB(0, 255, 255, 255),
-          Color.fromARGB(255, 153, 153, 153),
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(10)),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-// class DraggableFormCard extends StatefulWidget {
-//   final TextEditingController nameController;
-//   final TextEditingController ageController;
-//   final TextEditingController locationController;
-
-//   const DraggableFormCard({
-//     Key? key,
-//     required this.nameController,
-//     required this.ageController,
-//     required this.locationController,
-//   }) : super(key: key);
-
-//   @override
-//   _DraggableFormCardState createState() => _DraggableFormCardState();
-// }
-
-// class _DraggableFormCardState extends State<DraggableFormCard> {
-//   String selectedGender = '';
-//   double childSize = 0.57;
-
-//   void onGenderSelected(String gender) {
-//     setState(() {
-//       selectedGender = gender;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Stack(
-//       children: [
-//         Align(
-//           alignment: Alignment.bottomCenter,
-//           child: DraggableScrollableSheet(
-//             initialChildSize: 0.61,
-//             minChildSize: 0.60,
-//             maxChildSize: 0.85,
-//             builder: (context, scrollController) {
-//               scrollController.addListener(() {
-//                 if (scrollController.hasClients) {
-//                   setState(() {
-//                     childSize = scrollController.position.pixels /
-//                         scrollController.position.maxScrollExtent;
-//                   });
-//                 }
-//               });
-//               return SizedBox(
-//                 width: double.infinity,
-//                 child: Card(
-//                   margin: EdgeInsets.zero,
-//                   shape: const RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.only(
-//                       topLeft: Radius.circular(40),
-//                       topRight: Radius.circular(40),
-//                     ),
-//                   ),
-//                   elevation: 10,
-//                   color: Colors.black,
-//                   child: SingleChildScrollView(
-//                     controller: scrollController,
-//                     child: Padding(
-//                       padding: const EdgeInsets.symmetric(
-//                           horizontal: 20, vertical: 20),
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.center,
-//                         children: [
-//                           SizedBox(
-//                             height: 12,
-//                           ),
-//                           Text(
-//                             "Hey, Tell me about you!",
-//                             style: TextStyle(
-//                               color: Color.fromRGBO(255, 255, 255, 1),
-//                               fontSize: 20,
-//                               fontWeight: FontWeight.w600,
-//                               fontFamily: 'Inter',
-//                             ),
-//                           ),
-//                           const SizedBox(height: 10),
-//                           SvgPicture.asset(
-//                             'assets/svgs/Vector.svg',
-//                             width: 49,
-//                             height: 6,
-//                           ),
-//                           const SizedBox(height: 25),
-//                           Row(
-//                             mainAxisAlignment: MainAxisAlignment.center,
-//                             children: [
-//                               genderButton("Male", selectedGender == "Male",
-//                                   () {
-//                                 onGenderSelected("Male");
-//                               }),
-//                               const SizedBox(width: 15),
-//                               genderButton("Female", selectedGender == "Female",
-//                                   () {
-//                                 onGenderSelected("Female");
-//                               }),
-//                             ],
-//                           ),
-//                           const SizedBox(height: 12),
-//                           customInputField(
-//                               "Your good name", widget.nameController),
-//                           const SizedBox(height: 12),
-//                           customInputField(
-//                               "How old are you?", widget.ageController),
-//                           const SizedBox(height: 12),
-//                           CustomDropdownField(
-//                             controller: widget.locationController,
-//                             items: [
-//                               "New York",
-//                               "London",
-//                               "Paris",
-//                               "Tokyo",
-//                               'Mumbai'
-//                             ],
-//                             hint: "Location",
-//                             svgIconPath:
-//                                 'assets/svgs/tabler_location-filled.svg',
-//                           ),
-//                           const SizedBox(height: 20),
-//                         ],
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               );
-//             },
-//           ),
-//         ),
-//         if (childSize > 0.7)
-//           Positioned(
-//             top: 10,
-//             left: 10,
-//             right: 10,
-//             height: 250,
-//             child: Container(
-//               color: Colors.black.withOpacity(0.7),
-//               child: Column(
-//                 children: [
-//                   ClipOval(
-//                     child: Image.asset(
-//                       'assets/images/image2.png',
-//                       width: 120,
-//                       height: 120,
-//                       fit: BoxFit.cover,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 15),
-//                   const Text(
-//                     "User Name",
-//                     style: TextStyle(
-//                       color: Colors.white,
-//                       fontSize: 18,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//       ],
-//     );
-//   }
-// }
+// drag and  fixed forms------------------------------------------------------------------------------------>
 
 class StaticFormCard extends StatefulWidget {
   final TextEditingController nameController;
@@ -404,18 +344,18 @@ class StaticFormCard extends StatefulWidget {
   final Function(String) onGenderChanged; // Callback function
 
   const StaticFormCard({
-    Key? key,
+    super.key,
     required this.nameController,
     required this.ageController,
     required this.locationController,
     required this.onGenderChanged, // Pass callback
-  }) : super(key: key);
+  });
 
   @override
-  _StaticFormCardState createState() => _StaticFormCardState();
+  StaticFormCardState createState() => StaticFormCardState();
 }
 
-class _StaticFormCardState extends State<StaticFormCard> {
+class StaticFormCardState extends State<StaticFormCard> {
   String selectedGender = '';
 
   void onGenderSelected(String gender) {
@@ -427,63 +367,69 @@ class _StaticFormCardState extends State<StaticFormCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-      child: Card(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40),
-            topRight: Radius.circular(40),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context)
+            .unfocus(); // Dismiss keyboard when tapping outside
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        child: Card(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(40),
+              topRight: Radius.circular(40),
+            ),
           ),
-        ),
-        elevation: 10,
-        color: Colors.black,
-        child: Padding(
-          padding: const EdgeInsets.all(0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 15),
-              const Text(
-                "Hey, Tell me about you!",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter',
+          elevation: 10,
+          color: Colors.black,
+          child: Padding(
+            padding: const EdgeInsets.all(0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 0),
+                const Text(
+                  "Hey, Tell me about you!",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              SvgPicture.asset(
-                'assets/svgs/Vector.svg',
-                width: 55,
-                height: 8,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  genderButton("Male", selectedGender == "Male", () {
-                    onGenderSelected("Male");
-                  }),
-                  const SizedBox(width: 15),
-                  genderButton("Female", selectedGender == "Female", () {
-                    onGenderSelected("Female");
-                  }),
-                ],
-              ),
-              const SizedBox(height: 20),
-              customInputField("Your good name", widget.nameController),
-              const SizedBox(height: 15),
-              customInputField("How old are you?", widget.ageController),
-              const SizedBox(height: 10),
-              CustomDropdownField(
-                controller: widget.locationController,
-                items: ["New York", "London", "Paris", "Tokyo", 'Mumbai'],
-                hint: "Location",
-                svgIconPath: 'assets/svgs/tabler_location-filled.svg',
-              ),
-            ],
+                const SizedBox(height: 10),
+                SvgPicture.asset(
+                  'assets/svgs/Vector.svg',
+                  width: 55,
+                  height: 8,
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    genderButton("Male", selectedGender == "Male", () {
+                      onGenderSelected("Male");
+                    }),
+                    const SizedBox(width: 15),
+                    genderButton("Female", selectedGender == "Female", () {
+                      onGenderSelected("Female");
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                customInputField("Your good name", widget.nameController),
+                const SizedBox(height: 15),
+                customInputField("How old are you?", widget.ageController),
+                const SizedBox(height: 10),
+                CustomDropdownField(
+                  controller: widget.locationController,
+                  items: ["New York", "London", "Paris", "Tokyo", 'Mumbai'],
+                  hint: "Location",
+                  svgIconPath: 'assets/svgs/tabler_location-filled.svg',
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -491,105 +437,7 @@ class _StaticFormCardState extends State<StaticFormCard> {
   }
 }
 
-class CustomDropdownField extends StatefulWidget {
-  final TextEditingController controller;
-  final List<String> items;
-  final String hint;
-  final String svgIconPath;
-
-  const CustomDropdownField({
-    super.key,
-    required this.controller,
-    required this.items,
-    this.hint = "Select an option",
-    required this.svgIconPath,
-  });
-
-  @override
-  _CustomDropdownFieldState createState() => _CustomDropdownFieldState();
-}
-
-class _CustomDropdownFieldState extends State<CustomDropdownField> {
-  String? selectedValue;
-  bool isExpanded = false;
-  final FocusNode _focusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      setState(() {
-        isExpanded = _focusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 5),
-      curve: Curves.easeInOut,
-      height: isExpanded ? 80 : 65,
-      child: DropdownButtonFormField<String>(
-        focusNode: _focusNode,
-        value: selectedValue,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.grey[900],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(32),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14.0, horizontal: 20.0),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: SizedBox(
-              width: 16,
-              height: 16,
-              child: SvgPicture.asset(
-                widget.svgIconPath,
-                fit: BoxFit.scaleDown,
-              ),
-            ),
-          ),
-        ),
-        hint: Text(
-          widget.hint,
-          style: TextStyle(
-            color: isExpanded ? Colors.white : Colors.white54,
-            fontSize: isExpanded ? 18 : 15,
-            fontWeight: isExpanded ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        dropdownColor: Colors.grey[900],
-        style: const TextStyle(color: Colors.white),
-        items: widget.items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(
-              item,
-              style: const TextStyle(color: Colors.white),
-            ),
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            selectedValue = newValue;
-            widget.controller.text = newValue!;
-          });
-        },
-        icon: const SizedBox.shrink(),
-      ),
-    );
-  }
-}
+// SliderButtons -------------------------------------------------------->
 
 class SliderButton extends StatefulWidget {
   final String text;
@@ -610,10 +458,10 @@ class SliderButton extends StatefulWidget {
   });
 
   @override
-  _SliderButtonState createState() => _SliderButtonState();
+  SliderButtonState createState() => SliderButtonState();
 }
 
-class _SliderButtonState extends State<SliderButton>
+class SliderButtonState extends State<SliderButton>
     with SingleTickerProviderStateMixin {
   double _position = 0;
   bool _isCompleted = false;
@@ -632,6 +480,23 @@ class _SliderButtonState extends State<SliderButton>
     _scaleAnimation = Tween<double>(begin: 0.0, end: 2.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
+  }
+
+  void _resetPosition() {
+    Animation<double> resetAnimation = Tween<double>(begin: _position, end: 0)
+        .animate(CurvedAnimation(
+            parent: _animationController, curve: Curves.easeOut));
+
+    _animationController.duration = const Duration(milliseconds: 300);
+    _animationController.reset();
+
+    resetAnimation.addListener(() {
+      setState(() {
+        _position = resetAnimation.value;
+      });
+    });
+
+    _animationController.forward();
   }
 
   @override
@@ -724,25 +589,25 @@ class _SliderButtonState extends State<SliderButton>
                           _position = maxWidth - 60;
                           _isCompleted = true;
                         });
+
                         _animationController.forward();
                         widget.onSlide();
 
-                        print("Success tick shown");
+                        logger.i("Success tick shown");
 
-                        Future.delayed(const Duration(seconds: 2), () {
+                        Future.delayed(const Duration(seconds: 4), () {
                           if (mounted) {
+                            _animationController.reverse();
                             setState(() {
                               _isCompleted = false;
-                              _position = 0;
                             });
 
-                            print("State reset after delay");
+                            _resetPosition(); // Animate reset
+                            logger.i("State reset after delay");
                           }
                         });
                       } else {
-                        setState(() {
-                          _position = 0;
-                        });
+                        _resetPosition();
                       }
                     },
                     child: Padding(
@@ -824,14 +689,14 @@ class SlideToActButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<SlideActionState> _key = GlobalKey();
+    final GlobalKey<SlideActionState> key = GlobalKey();
 
     return Padding(
       padding: const EdgeInsets.all(10),
       child: SizedBox(
         width: width,
         child: SlideAction(
-          key: _key,
+          key: key,
           onSubmit: onSubmit,
           height: height,
           borderRadius: borderRadius,
@@ -923,7 +788,10 @@ class CustomEllipsePainter extends CustomPainter {
     final Paint paint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
-        colors: [color.withOpacity(0.5), color.withOpacity(0.0)],
+        colors: [
+          color.withValues(alpha: 0.4),
+          color.withValues(alpha: 0.0),
+        ],
         stops: [0.0, 1],
       ).createShader(Rect.fromCircle(
           center: Offset(size.width / 2, size.height / 2), radius: radius));
@@ -937,79 +805,17 @@ class CustomEllipsePainter extends CustomPainter {
   }
 }
 
-class SquareWithConnectedBoxes extends StatelessWidget {
-  final double size;
-
-  const SquareWithConnectedBoxes({
-    super.key,
-    this.size = 500.0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    int boxesPerRow = 13;
-    return Center(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            width: 1.3,
-            color: Colors.transparent,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromRGBO(255, 255, 255, 0.021),
-                  Color.fromRGBO(153, 153, 153, 0),
-                ],
-                stops: [0.0, 1.0],
-              ),
-            ),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: boxesPerRow,
-                crossAxisSpacing: 0.0,
-                mainAxisSpacing: 0.0,
-              ),
-              itemCount: 200,
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Color.fromRGBO(153, 153, 153, 0.05),
-                      width: 1.0,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback onBackPressed;
   final VoidCallback onSharePressed;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     required this.title,
     required this.onBackPressed,
     required this.onSharePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1033,7 +839,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             onTap: onBackPressed,
             child: SvgPicture.asset(
               'assets/svgs/downbutton.svg',
-              color: Colors.white,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               width: 24,
               height: 24,
             ),
@@ -1051,7 +858,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             onTap: onSharePressed,
             child: SvgPicture.asset(
               'assets/svgs/shareicon.svg',
-              color: Colors.white,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
               width: 20,
               height: 20,
             ),
@@ -1066,12 +874,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 void onBackPressed() {
-  print("Back pressed");
+  logger.i("Back pressed");
 }
 
 void onSharePressed() {
-  print("Share pressed");
+  logger.i("Share pressed");
 }
+
+//  3d model screen-------------------------------------------------------------------->
 
 class ModelViewerWidget extends StatefulWidget {
   final String modelPath;
@@ -1094,43 +904,113 @@ class ModelViewerWidget extends StatefulWidget {
 }
 
 class _ModelViewerWidgetState extends State<ModelViewerWidget> {
-  late String _currentModelPath;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _currentModelPath = widget.modelPath;
+    _simulateLoading();
   }
 
   @override
   void didUpdateWidget(covariant ModelViewerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.modelPath != widget.modelPath) {
       setState(() {
-        _currentModelPath = widget.modelPath;
+        _isLoading = true;
       });
+      _simulateLoading();
     }
+  }
+
+  void _simulateLoading() {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ModelViewer(
-      src: _currentModelPath,
-      alt: "A 3D model",
-      ar: false,
-      autoRotate: !widget.isInteractive,
-      cameraControls: widget.isInteractive,
-      disableZoom: false,
-      disablePan: false,
-      disableTap: false,
-      rotationPerSecond: "40deg",
-      cameraTarget: widget.cameraTarget,
-      cameraOrbit: widget.cameraOrbit,
-      minCameraOrbit: "auto 90deg auto",
-      maxCameraOrbit: "auto 90deg auto",
-    );
+    return Stack(alignment: Alignment.center, children: [
+      AnimatedScale(
+        scale: _isLoading ? 0.8 : 1.0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutBack,
+        child: AnimatedOpacity(
+          opacity: _isLoading ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 500),
+          child: ModelViewer(
+            loading: Loading.lazy,
+            src: widget.modelPath,
+            alt: "A 3D model",
+            ar: false,
+            autoRotate: !widget.isInteractive,
+            cameraControls: widget.isInteractive,
+            disableZoom: false,
+            disablePan: false,
+            disableTap: false,
+            rotationPerSecond: "40deg",
+            cameraTarget: widget.cameraTarget,
+            cameraOrbit: widget.cameraOrbit,
+            minCameraOrbit: "auto 90deg auto",
+            maxCameraOrbit: "auto 90deg auto",
+          ),
+        ),
+      ),
+      if (_isLoading)
+        Positioned.fill(
+          child: Shimmer.fromColors(
+            baseColor: Color.fromRGBO(0, 0, 0, 0.2), // Black with 20% opacity
+            highlightColor: Color.fromRGBO(255, 255, 255, 0.4),
+            child: Center(
+              child: ClipPath(
+                clipper: ModelClipper(), // Custom shape
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromRGBO(
+                            128, 128, 128, 0.1), // Grey with 10% opacity
+                        Color.fromRGBO(
+                            255, 255, 255, 0.3), // White with 30% opacity
+                        Color.fromRGBO(
+                            128, 128, 128, 0.1), // Grey with 10% opacity
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+    ]);
   }
+}
+
+class ModelClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    path.moveTo(size.width * 0.5, 0);
+    path.lineTo(size.width, size.height * 0.25);
+    path.lineTo(size.width * 0.75, size.height);
+    path.lineTo(size.width * 0.25, size.height);
+    path.lineTo(0, size.height * 0.25);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class CustomPaintStackwith3dModel extends StatefulWidget {
@@ -1139,11 +1019,11 @@ class CustomPaintStackwith3dModel extends StatefulWidget {
   const CustomPaintStackwith3dModel({super.key, required this.modelPath});
 
   @override
-  _CustomPaintStackwith3dModelState createState() =>
-      _CustomPaintStackwith3dModelState();
+  CustomPaintStackwith3dModelState createState() =>
+      CustomPaintStackwith3dModelState();
 }
 
-class _CustomPaintStackwith3dModelState
+class CustomPaintStackwith3dModelState
     extends State<CustomPaintStackwith3dModel> {
   late String _currentModelPath;
 
@@ -1176,6 +1056,7 @@ class _CustomPaintStackwith3dModelState
             width: 230,
             height: 352,
             child: ModelViewerWidget(
+              key: ValueKey(_currentModelPath),
               modelPath: _currentModelPath,
             ),
           ),
@@ -1226,7 +1107,7 @@ class _CustomPaintStackwith3dModelState
               size: const Size(250, 250),
               painter: CustomEllipsePainter(
                 radius: 100,
-                color: const Color.fromARGB(255, 255, 0, 0),
+                color: const Color.fromARGB(245, 175, 122, 8),
                 angle: 1,
               ),
             ),
@@ -1238,7 +1119,7 @@ class _CustomPaintStackwith3dModelState
               size: const Size(262, 262),
               painter: CustomEllipsePainter(
                 radius: 300,
-                color: const Color.fromARGB(123, 232, 204, 159),
+                color: const Color.fromARGB(122, 221, 176, 104),
                 angle: 0,
               ),
             ),
@@ -1249,41 +1130,54 @@ class _CustomPaintStackwith3dModelState
   }
 }
 
-class PositionableBox extends StatelessWidget {
-  final double? left;
-  final double? right;
-  final double? top;
-  final double? bottom;
-  final double width;
-  final double height;
-  final double opacity;
+class AnimatedModelViewerWidget extends StatelessWidget {
+  final bool isVisible;
+  final String modelPath;
+  final Animation<double> animation;
 
-  const PositionableBox({
-    Key? key,
-    this.left = 70,
-    this.right = 70,
-    this.top,
-    this.bottom,
-    this.width = 100,
-    this.height = 30,
-    this.opacity = 1.0,
-  }) : super(key: key);
+  const AnimatedModelViewerWidget({
+    super.key,
+    required this.isVisible,
+    required this.modelPath,
+    required this.animation,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: left,
-      right: right,
-      top: top,
-      bottom: bottom,
-      child: Opacity(
-        opacity: opacity,
-        child: Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 400),
+      opacity: isVisible ? 1.0 : 0.0,
+      child: AnimatedScale(
+        scale: isVisible ? 1.1 : 0.8,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        child: AnimatedSlide(
+          offset: isVisible ? Offset.zero : const Offset(0, 0.2),
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOut,
+          child: Center(
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: animation.value,
+                  child: ClipOval(
+                    child: Container(
+                      color: Colors.yellow,
+                      width: 200,
+                      height: 200,
+                      child: ModelViewerWidget(
+                        key: ValueKey(modelPath),
+                        modelPath: modelPath,
+                        cameraOrbit: "0deg 90deg 3.7m",
+                        isInteractive: false,
+                        cameraTarget: "0m 1.1m 0m",
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
